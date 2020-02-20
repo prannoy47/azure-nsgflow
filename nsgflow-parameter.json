@@ -1,0 +1,29 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "taggingSettings": {
+        "value": {
+            "tags": {
+                "AppID": "Demo",
+                "ApplicationName": "Demo"
+            }
+        }
+    },
+    "flowAnalyticsSettings": {
+        "value": {
+            "NetworkWatcherName": "NetworkWatcher_eastus2",
+            "NetworkWatcherRG": "NetworkWatcherRG",
+            "storageId": "/subscriptions/205dcef5-f966-48e3-9671-265c7379e647/resourceGroups/demo/providers/Microsoft.Storage/storageAccounts/flowlogsnb4ct4i4i7spc",
+            "settings": [
+                {
+                "targetResourceId": "/subscriptions/205dcef5-f966-48e3-9671-265c7379e647/resourceGroups/demo/providers/Microsoft.Network/networkSecurityGroups/demo-2-nsg"
+                },
+                {
+                "targetResourceId": "/subscriptions/205dcef5-f966-48e3-9671-265c7379e647/resourceGroups/demo/providers/Microsoft.Network/networkSecurityGroups/demo-1-nsg"
+                }
+              ]   
+           }
+        }
+    }
+}
