@@ -1,0 +1,78 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "taggingSettings": {
+            "type": "object"
+        },
+        "flowAnalyticsSettings": {
+            "type": "object"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2019-04-01",
+            "name": "[split(parameters('flowAnalyticsSettings').storageId,'/')[8]]",
+            "location": "[resourceGroup().location]",
+            "kind": "StorageV2",
+            "properties": {}
+        },
+        {
+            "apiVersion": "2019-09-01",
+            "name": "deployFlowLogs",
+            "type": "Microsoft.Resources/deployments",
+            "resourceGroup": "[parameters('flowAnalyticsSettings').NetworkWatcherRG]",
+            "dependsOn": [
+                "[split(parameters('flowAnalyticsSettings').storageId,'/')[8]]"
+            ],
+            "properties": {
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "taggingSettings": {
+                            "type": "object"
+                        },
+                        "flowAnalyticsSettings": {
+                            "type": "object"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "name": "[concat(parameters('flowAnalyticsSettings').NetworkWatcherName,'/','Microsoft.Network',split(parameters('flowAnalyticsSettings').settings[copyIndex('nwflcopy')].targetResourceId,'/')[4],split(parameters('flowAnalyticsSettings').settings[copyIndex('nwflcopy')].targetResourceId,'/')[8])]",
+                            "type": "Microsoft.Network/networkWatchers/FlowLogs",
+                            "copy": {
+                                "name": "nwflcopy",
+                                "count": "[length(parameters('flowAnalyticsSettings').settings)]"
+                            },
+                            "location": "[resourceGroup().location]",
+                            "apiVersion": "2019-11-01",
+                            "properties": {
+                                "targetResourceId": "[parameters('flowAnalyticsSettings').settings[copyIndex('nwflcopy')].targetResourceId]",
+                                "storageId": "[parameters('flowAnalyticsSettings').storageId]",
+                                "enabled": true,
+                                "retentionPolicy": {
+                                    "days": 0,
+                                    "enabled": true
+                                },
+                                "format": {
+                                    "type": "JSON",
+                                    "version": "2"
+                                }
+                            }
+                        }
+                    ]
+                },
+                "parameters": {
+                    "taggingSettings": {
+                        "value": "[parameters('taggingSettings').tags]"
+                    },
+                    "flowAnalyticsSettings": {
+                        "value": {}
+                    }
+                }
+            }
+        }
+    ]
+}
